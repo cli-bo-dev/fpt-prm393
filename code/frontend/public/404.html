@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PRM Flutter Learning</title>
+  <script>
+    // GitHub Pages SPA redirect for: cli-bo-dev.github.io/fpt-prm393/
+    var segmentCount = 1; // number of path segments in the repo name
+    var l = window.location;
+    var path = l.pathname.slice(1).split('/').slice(segmentCount).join('/');
+    sessionStorage.setItem(
+      'redirect',
+      '/' + path + (path ? '' : '') + (l.search ? l.search : '') + l.hash
+    );
+    l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?p');
+  </script>
+</head>
+<body></body>
+</html>

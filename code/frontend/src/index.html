@@ -6,6 +6,18 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Handle redirect from 404.html for GitHub Pages SPA
+    (function() {
+      var redirect = sessionStorage.getItem('redirect');
+      if (redirect) {
+        sessionStorage.removeItem('redirect');
+        if (redirect !== window.location.pathname + window.location.search + window.location.hash) {
+          window.history.replaceState(null, null, redirect);
+        }
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>
