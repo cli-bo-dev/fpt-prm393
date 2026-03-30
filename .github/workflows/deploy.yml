@@ -39,12 +39,12 @@ jobs:
         run: npx ng build --configuration production --base-href "/fpt-prm393/"
 
       - name: List build output
-        run: ls -la dist/frontend/browser/
+        run: ls -la dist/frontend/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: code/frontend/dist/frontend/browser
+          path: code/frontend/dist/frontend
 
   deploy:
     needs: build
