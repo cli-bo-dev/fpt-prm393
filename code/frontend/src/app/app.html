@@ -1,0 +1,24 @@
+<div class="page">
+  <header class="hero">
+    <div class="hero-badge">PRM - Mobile Development</div>
+    <h1>Flutter Learning Path</h1>
+    <p>12 module từ cơ bản đến nâng cao — từng bước làm chủ Flutter</p>
+  </header>
+
+  <main class="grid">
+    @for (mod of modules; track mod.id) {
+      <div class="card">
+        <div class="card-number">{{ mod.id < 10 ? '0' + mod.id : mod.id }}</div>
+        <div class="card-icon">{{ mod.icon }}</div>
+        <h2 class="card-title">{{ mod.title }}</h2>
+        <p class="card-desc">{{ mod.desc }}</p>
+        <div class="card-footer">
+          <span class="tag">Module {{ mod.id }}</span>
+          <button class="btn" (click)="openModule(mod.id)">Xem chi tiết →</button>
+        </div>
+      </div>
+    }
+  </main>
+</div>
+
+<router-outlet />

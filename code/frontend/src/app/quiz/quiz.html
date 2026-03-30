@@ -1,0 +1,77 @@
+@if (questions.length === 0) {
+  <div class="empty">
+    <p>No questions available for this module yet.</p>
+    <button (click)="goBack()">← Back to Practice</button>
+  </div>
+} @else if (finished) {
+  <div class="result-page">
+    <div class="topbar">
+      <button class="back-btn" (click)="goHome()">⌂ Home</button>
+      <button class="back-btn" (click)="goBack()">← Practice</button>
+    </div>
+    <div class="result-card">
+      <div class="result-icon">{{ moduleIcon }}</div>
+      <h2>{{ moduleTitle }}</h2>
+      <div class="score-circle">
+        <span class="score-num">{{ score }}/{{ questions.length }}</span>
+        <span class="score-pct">{{ scorePercent }}%</span>
+      </div>
+      <div class="score-label">{{ scoreLabel }}</div>
+      <div class="result-actions">
+        <button class="btn-restart" (click)="restart()">🔄 Try Again</button>
+        <button class="btn-back" (click)="goBack()">← Back to Practice</button>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="quiz-page">
+    <div class="topbar">
+      <button class="back-btn" (click)="goHome()">⌂ Home</button>
+      <button class="back-btn" (click)="goBack()">← Practice</button>
+      <span class="breadcrumb">{{ moduleIcon }} {{ moduleTitle }}</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="progress"></div>
+    </div>
+
+    <div class="quiz-body">
+      <div class="q-counter">Question {{ current + 1 }} / {{ questions.length }}</div>
+      <h2 class="q-text">{{ currentQ.question }}</h2>
+
+      <div class="options">
+        @for (opt of currentQ.options; track opt; let i = $index) {
+          <button
+            class="option"
+            [class.selected]="selected === i && !submitted"
+            [class.correct]="submitted && i === currentQ.answer"
+            [class.wrong]="submitted && selected === i && i !== currentQ.answer"
+            (click)="select(i)"
+          >
+            <span class="opt-letter">{{ ['A','B','C','D'][i] }}</span>
+            <span class="opt-text">{{ opt }}</span>
+          </button>
+        }
+      </div>
+
+      @if (submitted) {
+        <div class="explanation">
+          <span class="exp-icon">💡</span>
+          <p>{{ currentQ.explanation }}</p>
+        </div>
+      }
+
+      <div class="quiz-actions">
+        @if (!submitted) {
+          <button class="btn-submit" [disabled]="selected === null" (click)="submit()">
+            Confirm
+          </button>
+        } @else {
+          <button class="btn-next" (click)="next()">
+            {{ isLast ? 'See Results 🏁' : 'Next Question →' }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

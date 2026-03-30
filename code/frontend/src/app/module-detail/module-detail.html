@@ -1,0 +1,119 @@
+@if (module) {
+  <div class="detail-page">
+    <div class="topbar">
+      <button class="back-btn" (click)="goHome()">⌂ Home</button>
+      <button class="back-btn" (click)="goBack()">← Documents</button>
+      <span class="breadcrumb">PRM / Module {{ module.id }}</span>
+    </div>
+
+    <header class="detail-hero">
+      <div class="module-badge">Module {{ module.id < 10 ? '0' + module.id : module.id }}</div>
+      <div class="detail-icon">{{ module.icon }}</div>
+      <h1>{{ module.title }}</h1>
+      <p>{{ module.desc }}</p>
+    </header>
+
+    <div class="detail-content">
+
+      @if (module.contents && module.contents.length > 0) {
+        <section class="section-block toc">
+          <h2 class="section-heading">📋 Contents</h2>
+          <ol class="toc-list">
+            @for (item of module.contents; track item) {
+              <li>{{ item }}</li>
+            }
+          </ol>
+        </section>
+      }
+
+      @if (module.sections && module.sections.length > 0) {
+        @for (section of module.sections; track section.heading) {
+          <section class="section-block">
+            <h2 class="section-heading">{{ section.heading }}</h2>
+
+            @if (section.content) {
+              <p class="section-text">{{ section.content }}</p>
+            }
+
+            @if (section.list && section.list.length > 0) {
+              <ul class="section-list">
+                @for (item of section.list; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            }
+
+            @if (section.code) {
+              <div class="code-block">
+                <div class="code-lang">{{ section.codeLanguage ?? 'code' }}</div>
+                <pre><code>{{ section.code }}</code></pre>
+              </div>
+            }
+
+            @if (section.subSections && section.subSections.length > 0) {
+              @for (sub of section.subSections; track sub.heading) {
+                <div class="sub-section">
+                  @if (sub.heading) {
+                    <h3 class="sub-heading">{{ sub.heading }}</h3>
+                  }
+                  @if (sub.content) {
+                    <p class="section-text">{{ sub.content }}</p>
+                  }
+                  @if (sub.list && sub.list.length > 0) {
+                    <ul class="section-list">
+                      @for (item of sub.list; track item) {
+                        <li>{{ item }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
+            }
+
+            @if (section.table) {
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      @for (h of section.table.headers; track h) {
+                        <th>{{ h }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of section.table.rows; track row[0]) {
+                      <tr>
+                        @for (cell of row; track cell) {
+                          <td>{{ cell }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            @if (section.highlights && section.highlights.length > 0) {
+              <div class="highlights">
+                @for (h of section.highlights; track h) {
+                  <div class="highlight-item">💡 {{ h }}</div>
+                }
+              </div>
+            }
+
+          </section>
+        }
+      } @else {
+        <div class="coming-soon">
+          <span>🚧</span>
+          <p>Content for this module is coming soon...</p>
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="not-found">
+    <p>Module not found.</p>
+    <button (click)="goBack()">← Back</button>
+  </div>
+}

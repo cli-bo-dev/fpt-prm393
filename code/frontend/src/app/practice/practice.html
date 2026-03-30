@@ -1,0 +1,35 @@
+<div class="page">
+  <div class="topbar">
+    <button class="back-btn" (click)="goHome()">⌂ Home</button>
+    <span class="breadcrumb">PRM / Practice</span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-badge">PRM - Practice</div>
+    <h1>Practice by Module</h1>
+    <p>Test your knowledge with multiple-choice quizzes for each module</p>
+  </header>
+
+  <main class="grid">
+    @for (mod of modules; track mod.id) {
+      <div class="card" [class.has-quiz]="hasQuiz(mod.id)" [class.no-quiz]="!hasQuiz(mod.id)">
+        <div class="card-number">{{ mod.id < 10 ? '0' + mod.id : mod.id }}</div>
+        <div class="card-icon">{{ mod.icon }}</div>
+        <h2 class="card-title">{{ mod.title }}</h2>
+
+        @if (hasQuiz(mod.id)) {
+          <div class="quiz-meta">
+            <span class="q-count">{{ questionCount(mod.id) }} questions</span>
+            <span class="q-badge available">Ready</span>
+          </div>
+          <button class="btn-quiz" (click)="openQuiz(mod.id)">Start Quiz →</button>
+        } @else {
+          <div class="quiz-meta">
+            <span class="q-badge coming">Coming soon</span>
+          </div>
+          <button class="btn-quiz disabled" disabled>No questions yet</button>
+        }
+      </div>
+    }
+  </main>
+</div>
