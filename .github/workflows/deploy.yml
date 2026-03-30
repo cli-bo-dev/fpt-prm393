@@ -36,7 +36,10 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npx ng build --configuration production --base-href "/${{ github.event.repository.name }}/"
+        run: npx ng build --configuration production --base-href "/fpt-prm393/"
+
+      - name: List build output
+        run: ls -la dist/frontend/browser/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
