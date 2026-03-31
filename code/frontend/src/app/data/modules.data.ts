@@ -1456,7 +1456,288 @@ export const MODULES: ModuleData[] = [
       },
     ],
   },
-  { id: 7,  title: 'Forms and Validation',                                icon: '📝', desc: 'Tạo form, validate dữ liệu và xử lý input người dùng.' },
+  {
+    id: 7,
+    title: 'Forms and Validation',
+    icon: '📝',
+    desc: 'Tạo form, validate dữ liệu và xử lý input người dùng.',
+    contents: [
+      'Build forms using Form and TextFormField',
+      'Use FormState and GlobalKey to validate and save data',
+      'Apply built-in and custom validation rules',
+      'Manage focus and keyboard interactions',
+      'Design user-friendly error messages',
+      'Implement a complete signup form with validation',
+    ],
+    sections: [
+      {
+        heading: 'Why Forms Matter',
+        content: 'Forms are critical in almost every application.',
+        subSections: [
+          {
+            heading: 'Common use cases',
+            list: ['Login / Signup', 'Profile update', 'Feedback & contact forms', 'Booking and checkout', 'Search and filtering inputs'],
+          },
+          {
+            heading: 'If forms are done poorly',
+            list: ['Users submit invalid or incomplete data', 'Users get frustrated and abandon the app', 'Security and data quality issues appear'],
+          },
+        ],
+        highlights: ['Key Idea: Good apps = Good forms + Good validation.'],
+      },
+      {
+        heading: 'Input Widgets Overview',
+        content: 'Core input widgets in Flutter:',
+        list: [
+          'TextField – Basic text input',
+          'TextFormField – Text input with validation support inside a Form',
+          'Checkbox, Switch, Radio – Boolean choices',
+          'DropdownButton – Pick from a list of options',
+          'Date & Time pickers – Select from dialogs',
+        ],
+        highlights: [
+          'Use TextField for simple, one-off inputs.',
+          'Use TextFormField inside a Form when validation is needed.',
+          'In this course, when we say "form", we almost always mean using TextFormField.',
+        ],
+      },
+      {
+        heading: 'Form & FormState',
+        content: 'A Form widget groups multiple input fields together. A GlobalKey<FormState> allows you to validate, save, and reset all fields at once.',
+        subSections: [
+          {
+            heading: 'Core methods',
+            list: [
+              'formKey.currentState!.validate() — validates all fields',
+              'formKey.currentState!.save() — saves all field values',
+              'formKey.currentState!.reset() — resets all fields',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 1: Basic Signup Form',
+        content: 'Goal: Create a simple signup form using Form + TextFormField.',
+        subSections: [
+          {
+            heading: 'Requirements',
+            list: [
+              'Fields: Full Name, Email, Password',
+              'All fields are required',
+              'Email must contain @ and .',
+              'Password must be at least 6 characters',
+            ],
+          },
+          {
+            heading: 'Submit Behavior',
+            list: ['validate() → Show inline errors', 'If valid → Show SnackBar: "Signup successful"'],
+          },
+          {
+            heading: 'Structure',
+            list: ['Scaffold', 'AppBar', 'Form with _formKey', 'TextFormField for name, email, password', 'Submit button'],
+          },
+        ],
+        code: `final _formKey = GlobalKey<FormState>();\n\nForm(\n  key: _formKey,\n  child: Column(\n    children: [\n      TextFormField(\n        decoration: const InputDecoration(labelText: 'Full Name'),\n        validator: (v) => v == null || v.isEmpty ? 'Name is required' : null,\n      ),\n      TextFormField(\n        decoration: const InputDecoration(labelText: 'Email'),\n        validator: (v) {\n          if (v == null || v.isEmpty) return 'Email is required';\n          if (!v.contains('@') || !v.contains('.')) return 'Enter a valid email';\n          return null;\n        },\n      ),\n      TextFormField(\n        obscureText: true,\n        decoration: const InputDecoration(labelText: 'Password'),\n        validator: (v) {\n          if (v == null || v.isEmpty) return 'Password is required';\n          if (v.length < 6) return 'Password must be at least 6 characters';\n          return null;\n        },\n      ),\n      ElevatedButton(\n        onPressed: () {\n          if (_formKey.currentState!.validate()) {\n            _formKey.currentState!.save();\n            ScaffoldMessenger.of(context).showSnackBar(\n              const SnackBar(content: Text('Signup successful')),\n            );\n          }\n        },\n        child: const Text('Submit'),\n      ),\n    ],\n  ),\n)`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Built-in Validators',
+        content: 'The validator function signature: String? Function(String? value)',
+        list: [
+          'If valid → return null',
+          'If invalid → return error message (String)',
+          'Required field: check if value is null or empty',
+          'Email format: check for @ and .',
+          'Minimum length: check value.length',
+        ],
+      },
+      {
+        heading: 'Demo 2: Custom Validation Rules',
+        content: 'Goal: Add strong password and confirm password logic.',
+        subSections: [
+          {
+            heading: 'Requirements',
+            list: [
+              'Password ≥ 8 characters and must include a number',
+              'Confirm password must match the password',
+              'Use helper validator functions',
+              'Enable AutovalidateMode.onUserInteraction',
+            ],
+          },
+          {
+            heading: 'Custom validators for',
+            list: [
+              'Business rules (username rules, banned words)',
+              'Password strength (length, numbers, symbols)',
+              'Advanced email validation using regex',
+            ],
+          },
+          {
+            heading: 'Confirm Password Logic',
+            list: [
+              'Store _password in state',
+              'Compare confirm password with stored password',
+              'Show error if they do not match',
+            ],
+          },
+        ],
+        code: `String? validatePassword(String? value) {\n  if (value == null || value.isEmpty) return 'Password is required';\n  if (value.length < 8) return 'Password must be at least 8 characters';\n  if (!value.contains(RegExp(r'[0-9]'))) return 'Password must include a number';\n  return null;\n}\n\nString? validateConfirmPassword(String? value, String password) {\n  if (value != password) return 'Passwords do not match';\n  return null;\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'AutovalidateMode',
+        content: 'Controls when validation is triggered automatically.',
+        table: {
+          headers: ['Mode', 'Behavior'],
+          rows: [
+            ['AutovalidateMode.disabled', 'Only validates when validate() is called manually'],
+            ['AutovalidateMode.always', 'Validates on every change — can be annoying'],
+            ['AutovalidateMode.onUserInteraction', 'Validates after the user interacts — recommended'],
+          ],
+        },
+        highlights: [
+          'Too early → annoying (red errors appear immediately)',
+          'Too late → confusing (errors only appear after submit)',
+          'Recommended: AutovalidateMode.onUserInteraction',
+        ],
+      },
+      {
+        heading: 'Error Messages & UX',
+        content: 'Good error messages should be: short, clear, specific, polite, and helpful.',
+        subSections: [
+          {
+            heading: 'Examples',
+            list: ['"Enter a valid email"', '"Password must be at least 8 characters"', '"This email is already taken"'],
+          },
+          {
+            heading: 'Best Practices',
+            list: ['Show error under the field', 'Avoid blaming language', 'Highlight only relevant fields'],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 3: Focus & Keyboard UX',
+        content: 'Goal: Improve the input experience on mobile devices.',
+        subSections: [
+          {
+            heading: 'Requirements',
+            list: [
+              'Create FocusNode for each field',
+              'Use textInputAction (Next / Done)',
+              'Move focus using onFieldSubmitted',
+              'Dismiss keyboard using GestureDetector',
+              'Wrap form in ListView to prevent overflow',
+            ],
+          },
+          {
+            heading: 'Why manage focus?',
+            list: [
+              'Mobile keyboards can hide input fields',
+              'Users expect "Next" / "Done" to work smoothly',
+            ],
+          },
+          {
+            heading: 'Tools',
+            list: [
+              'FocusNode',
+              'textInputAction',
+              'onFieldSubmitted',
+              'FocusScope.of(context).requestFocus(nextFocusNode)',
+            ],
+          },
+        ],
+        code: `final _emailFocus = FocusNode();\nfinal _passwordFocus = FocusNode();\n\nTextFormField(\n  textInputAction: TextInputAction.next,\n  onFieldSubmitted: (_) =>\n    FocusScope.of(context).requestFocus(_passwordFocus),\n  decoration: const InputDecoration(labelText: 'Email'),\n),\n\nTextFormField(\n  focusNode: _passwordFocus,\n  textInputAction: TextInputAction.done,\n  onFieldSubmitted: (_) =>\n    FocusScope.of(context).unfocus(),\n  decoration: const InputDecoration(labelText: 'Password'),\n),`,
+        codeLanguage: 'dart',
+        highlights: [
+          'Wrap the form with GestureDetector to dismiss keyboard on tap outside.',
+          'Wrap the form in ListView or SingleChildScrollView to avoid overflow when keyboard appears.',
+        ],
+      },
+      {
+        heading: 'Form Layout Patterns',
+        subSections: [
+          {
+            heading: 'Common layouts',
+            list: [
+              'Single-page scrollable form',
+              'Grouped sections (e.g., Personal Info / Account Info)',
+              'Multi-step wizard (conceptual)',
+            ],
+          },
+          {
+            heading: 'Avoid',
+            list: [
+              'Too many fields on one screen without grouping',
+              'Keyboard covering the submit button',
+              'Fixed height containers that do not scroll',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 4: Async Email Check (Optional)',
+        content: 'Goal: Simulate server-side validation.',
+        subSections: [
+          {
+            heading: 'Requirements',
+            list: [
+              'Validate form locally first',
+              'Show loading state during async check',
+              'Fake delay with Future.delayed()',
+              'If email starts with "taken" → show error "Email already taken"',
+              'Disable Submit button while checking',
+            ],
+          },
+        ],
+        code: `Future<void> _checkEmail(String email) async {\n  setState(() => _isLoading = true);\n  await Future.delayed(const Duration(seconds: 1));\n  setState(() {\n    _isLoading = false;\n    if (email.startsWith('taken')) {\n      _emailError = 'Email already taken';\n    }\n  });\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'From Form to Backend',
+        content: 'After validation, data flows through the full stack:',
+        list: [
+          'User fills the form',
+          'Local validation (Module 7)',
+          'Send data via API (Module 8)',
+          'Server performs deeper checks',
+          'Server returns success or error',
+          'UI updates accordingly',
+        ],
+      },
+      {
+        heading: 'Full Signup Form Features',
+        list: [
+          'Name, Email, Password, Confirm Password fields',
+          'Built-in + custom validation',
+          'AutovalidateMode.onUserInteraction',
+          'Focus management (Next / Done)',
+          'Show/hide password toggle',
+          'Async email availability check with loading state',
+        ],
+      },
+      {
+        heading: 'Labs',
+        subSections: [
+          { heading: 'Lab 7.1', content: 'Basic registration form' },
+          { heading: 'Lab 7.2', content: 'Validation rules & password strength' },
+          { heading: 'Lab 7.3', content: 'Focus & keyboard management' },
+          { heading: 'Lab 7.4', content: 'Optional async email check' },
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned how to:',
+        list: [
+          'Build forms using Form and TextFormField',
+          'Use FormState and GlobalKey to validate, save, and reset data',
+          'Implement required fields and custom validation rules',
+          'Manage focus and keyboard interactions on mobile',
+          'Show clear error messages and success feedback',
+          'Combine everything into a complete signup form',
+        ],
+      },
+    ],
+  },
   { id: 8,  title: 'Working with RESTful APIs & JSON',                    icon: '🌐', desc: 'Gọi API, parse JSON và hiển thị dữ liệu từ server.' },
   { id: 9,  title: 'Local Storage & Persistence',                         icon: '💾', desc: 'Lưu trữ dữ liệu cục bộ với SharedPreferences và SQLite.' },
   { id: 10, title: 'Authentication, Session Management & Notifications',  icon: '🔐', desc: 'Đăng nhập, quản lý phiên và push notification.' },

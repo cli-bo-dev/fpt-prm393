@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MODULES } from '../data/modules.data';
 import { QUIZZES } from '../data/quiz.data';
+import { ThemeToggle } from '../components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-practice',
-  imports: [],
+  imports: [ThemeToggle],
   templateUrl: './practice.html',
   styleUrl: './practice.css',
 })

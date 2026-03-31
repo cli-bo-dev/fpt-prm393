@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QUIZZES, QuizQuestion } from '../data/quiz.data';
 import { MODULES } from '../data/modules.data';
+import { ThemeToggle } from '../components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-quiz',
-  imports: [],
+  imports: [ThemeToggle],
   templateUrl: './quiz.html',
   styleUrl: './quiz.css',
 })

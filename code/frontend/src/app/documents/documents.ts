@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MODULES } from '../data/modules.data';
+import { ThemeToggle } from '../components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-documents',
-  imports: [],
+  imports: [ThemeToggle],
   templateUrl: './documents.html',
   styleUrl: './documents.css',
 })

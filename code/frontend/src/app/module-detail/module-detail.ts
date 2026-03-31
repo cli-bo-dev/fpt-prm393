@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MODULES, ModuleData } from '../data/modules.data';
+import { ThemeToggle } from '../components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-module-detail',
-  imports: [],
+  imports: [ThemeToggle],
   templateUrl: './module-detail.html',
   styleUrl: './module-detail.css',
 })
