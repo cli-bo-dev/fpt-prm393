@@ -1738,9 +1738,1146 @@ export const MODULES: ModuleData[] = [
       },
     ],
   },
-  { id: 8,  title: 'Working with RESTful APIs & JSON',                    icon: '🌐', desc: 'Gọi API, parse JSON và hiển thị dữ liệu từ server.' },
-  { id: 9,  title: 'Local Storage & Persistence',                         icon: '💾', desc: 'Lưu trữ dữ liệu cục bộ với SharedPreferences và SQLite.' },
-  { id: 10, title: 'Authentication, Session Management & Notifications',  icon: '🔐', desc: 'Đăng nhập, quản lý phiên và push notification.' },
-  { id: 11, title: 'Testing & Debugging in Flutter',                      icon: '🧪', desc: 'Unit test, widget test, debug và tối ưu lỗi.' },
-  { id: 12, title: 'Performance Optimization & App Deployment',           icon: '🏆', desc: 'Tối ưu hiệu năng và deploy app lên store.' },
+  {
+    id: 8,
+    title: 'Working with RESTful APIs & JSON',
+    icon: '🌐',
+    desc: 'Gọi API, parse JSON và hiển thị dữ liệu từ server.',
+    contents: [
+      'HTTP fundamentals & RESTful API concepts',
+      'Using the http package for GET and POST requests',
+      'Parsing JSON into Dart model classes',
+      'Displaying API data with FutureBuilder + ListView',
+      'Handling loading, empty, and error states',
+      'Service Layer pattern for clean architecture',
+    ],
+    sections: [
+      {
+        heading: 'What is an API? What is HTTP?',
+        content: 'An API (Application Programming Interface) is a contract that allows clients (your app) to communicate with a server. APIs are usually exposed as a set of URLs called endpoints.',
+        subSections: [
+          {
+            heading: 'HTTP Methods',
+            list: ['GET — Retrieve data', 'POST — Create/submit data', 'PUT — Update data', 'DELETE — Remove data'],
+          },
+          {
+            heading: 'HTTP Status Codes',
+            list: ['200–299 → Success', '400–499 → Client error', '500–599 → Server error'],
+          },
+        ],
+      },
+      {
+        heading: 'What is JSON?',
+        content: 'JSON (JavaScript Object Notation) is a lightweight, text-based format for exchanging data.',
+        list: [
+          'Consists of key–value pairs and arrays',
+          'Easy for humans to read and write',
+          'Maps naturally to Dart structures: Map<String, dynamic> and List<dynamic>',
+        ],
+        highlights: [
+          'JSON received from an API is always a String. You must decode it using json.decode() and then map it to Dart model classes.',
+        ],
+      },
+      {
+        heading: 'API Networking in Flutter — The Big Picture',
+        content: 'Typical steps when calling an API:',
+        list: [
+          '1. Choose an endpoint (URL + HTTP method)',
+          '2. Send the request using an HTTP client',
+          '3. Receive the JSON response',
+          '4. Decode JSON and convert it into Dart model classes',
+          '5. Update the UI with the received data',
+          '6. Handle loading, empty, and error states',
+        ],
+        highlights: ['All network calls are asynchronous. You must use Future, async/await, and proper state management.'],
+      },
+      {
+        heading: 'Using the http Package',
+        content: 'The most common way to make HTTP requests in Flutter.',
+        highlights: ['Add to pubspec.yaml: http: ^1.2.0', 'Import: import \'package:http/http.dart\' as http;'],
+        code: `import 'package:http/http.dart' as http;\n\n// GET request\nfinal response = await http.get(Uri.parse(url));\n\n// POST request\nfinal response = await http.post(\n  Uri.parse(url),\n  headers: {'Content-Type': 'application/json'},\n  body: json.encode({'title': 'Hello', 'body': 'World'}),\n);`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Demo 8.1: Simple GET Request',
+        content: 'Goal: Fetch data from a public REST API using HTTP GET and print the response.',
+        highlights: ['Demo API: https://jsonplaceholder.typicode.com/posts'],
+        code: `Future<void> fetchPosts() async {\n  final url = Uri.parse('https://jsonplaceholder.typicode.com/posts');\n  final response = await http.get(url);\n  if (response.statusCode == 200) {\n    print('Response body: \${response.body}');\n  } else {\n    print('Request failed: \${response.statusCode}');\n  }\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Futures & async/await (Quick Review)',
+        list: [
+          'Future<T> represents a value that will be available later',
+          'async marks a function as asynchronous',
+          'await pauses execution until the Future completes',
+        ],
+        highlights: [
+          'Prevents the UI from freezing while waiting for network responses.',
+          'Makes asynchronous code readable and maintainable.',
+        ],
+      },
+      {
+        heading: 'FutureBuilder: Binding Data to UI',
+        content: 'FutureBuilder integrates async operations directly into the widget tree and automatically handles all states.',
+        table: {
+          headers: ['State', 'What to Show'],
+          rows: [
+            ['ConnectionState.waiting', 'CircularProgressIndicator (loading)'],
+            ['snapshot.hasError', 'Error message + Retry button'],
+            ['!snapshot.hasData || data is empty', '"No data available"'],
+            ['snapshot.hasData', 'Build UI with received data'],
+          ],
+        },
+        code: `FutureBuilder<List<Post>>(\n  future: ApiService.fetchPosts(),\n  builder: (context, snapshot) {\n    if (snapshot.connectionState == ConnectionState.waiting) {\n      return const CircularProgressIndicator();\n    }\n    if (snapshot.hasError) {\n      return Text('Error: \${snapshot.error}');\n    }\n    if (!snapshot.hasData || snapshot.data!.isEmpty) {\n      return const Text('No posts found.');\n    }\n    return ListView.builder(\n      itemCount: snapshot.data!.length,\n      itemBuilder: (_, i) => ListTile(title: Text(snapshot.data![i].title)),\n    );\n  },\n)`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Parsing JSON into Dart Models',
+        content: 'Why create model classes? Type safety, clear data structure, easier to maintain and reuse.',
+        code: `class Post {\n  final int id;\n  final String title;\n  final String body;\n\n  Post({required this.id, required this.title, required this.body});\n\n  factory Post.fromJson(Map<String, dynamic> json) {\n    return Post(\n      id: json['id'] as int,\n      title: json['title'] as String,\n      body: json['body'] as String,\n    );\n  }\n}`,
+        codeLanguage: 'dart',
+        highlights: ['factory Post.fromJson() is the standard pattern for converting a JSON Map to a typed Dart object.'],
+      },
+      {
+        heading: 'Converting JSON List to List<Model>',
+        content: 'Key process for converting a JSON array response to a typed Dart list:',
+        code: `final List<dynamic> jsonList = json.decode(response.body);\nfinal List<Post> posts = jsonList\n    .map((item) => Post.fromJson(item as Map<String, dynamic>))\n    .toList();`,
+        codeLanguage: 'dart',
+        highlights: [
+          'json.decode() returns List<dynamic>.',
+          'Use .map() to convert each item to a Model.',
+          'Call .toList() to get a typed List<Post>.',
+        ],
+      },
+      {
+        heading: 'Demo 8.3: Sending Data via POST',
+        content: 'Goal: Send data to an API using HTTP POST with loading, success, and error states.',
+        code: `Future<void> createPost(String title, String body) async {\n  final response = await http.post(\n    Uri.parse('https://jsonplaceholder.typicode.com/posts'),\n    headers: {'Content-Type': 'application/json'},\n    body: json.encode({'title': title, 'body': body, 'userId': 1}),\n  );\n  if (response.statusCode == 201) {\n    print('Created: \${response.body}');\n  } else {\n    throw Exception('Failed to create post: \${response.statusCode}');\n  }\n}`,
+        codeLanguage: 'dart',
+        subSections: [
+          {
+            heading: 'Common failures',
+            list: ['No internet connection', 'Server error (5xx)', 'Invalid JSON', 'Timeout'],
+          },
+          {
+            heading: 'Best Practice',
+            list: ['Throw exceptions in service functions', 'Show user-friendly error messages', 'Provide a "Retry" button'],
+          },
+        ],
+      },
+      {
+        heading: 'Loading & Button States (UX)',
+        list: [
+          'Disable the submit button while the request is in progress',
+          'Show a loading indicator (CircularProgressIndicator)',
+          'Prevent double submission',
+        ],
+      },
+      {
+        heading: 'Demo 8.4: ApiService (Service Layer Pattern)',
+        content: 'Move all HTTP logic into a separate service class to keep UI code clean.',
+        code: `class ApiService {\n  static const _base = 'https://jsonplaceholder.typicode.com';\n\n  static Future<List<Post>> fetchPosts() async {\n    final response = await http.get(Uri.parse('\$_base/posts'));\n    if (response.statusCode != 200) {\n      throw Exception('Failed to load posts');\n    }\n    final List<dynamic> data = json.decode(response.body);\n    return data.map((e) => Post.fromJson(e)).toList();\n  }\n\n  static Future<Post> createPost(String title, String body) async {\n    final response = await http.post(\n      Uri.parse('\$_base/posts'),\n      headers: {'Content-Type': 'application/json'},\n      body: json.encode({'title': title, 'body': body, 'userId': 1}),\n    );\n    if (response.statusCode != 201) {\n      throw Exception('Failed to create post');\n    }\n    return Post.fromJson(json.decode(response.body));\n  }\n}`,
+        codeLanguage: 'dart',
+        subSections: [
+          {
+            heading: 'Benefits of Service Layer',
+            list: ['Separation of concerns', 'Easier to test', 'Better maintainability', 'Single source of truth for API calls'],
+          },
+        ],
+      },
+      {
+        heading: 'Common Pitfalls & Best Practices',
+        subSections: [
+          {
+            heading: 'Pitfalls to avoid',
+            list: [
+              'Calling APIs directly inside build()',
+              'Not handling errors → app crashes',
+              'Hardcoding URLs everywhere',
+              'Blocking the UI thread with heavy JSON parsing',
+            ],
+          },
+          {
+            heading: 'Best Practices',
+            list: [
+              'Call APIs in initState() or using a service',
+              'Centralize base URL and endpoints',
+              'Wrap networking logic in service classes',
+              'Always handle loading, empty, and error states',
+              'Log responses during development',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned how to:',
+        list: [
+          'Understand RESTful APIs and HTTP methods',
+          'Send GET and POST requests using the http package',
+          'Decode JSON and convert it into typed Dart model classes',
+          'Display API data with FutureBuilder and ListView',
+          'Handle loading, empty, and error states properly',
+          'Organize networking code using a clean Service Layer pattern',
+        ],
+        highlights: ['You are now ready to connect your Flutter app to real backend services.'],
+      },
+    ],
+  },
+  {
+    id: 9,
+    title: 'Local Storage & Persistence',
+    icon: '💾',
+    desc: 'Lưu trữ dữ liệu cục bộ với SharedPreferences và SQLite.',
+    contents: [
+      'Why Local Storage?',
+      'Types of Local Storage (SharedPreferences, JSON File, SQLite)',
+      'SharedPreferences — key-value storage',
+      'File Storage with dart:io and path_provider',
+      'SQLite with SQFlite — CRUD operations',
+      'Offline-First strategy',
+      'Lab: Offline-First Mini App',
+    ],
+    sections: [
+      {
+        heading: 'Why Local Storage?',
+        content: 'Local storage is data saved directly on the user\'s device.',
+        subSections: [
+          {
+            heading: 'Key Benefits',
+            list: ['Available offline', 'Persistent across app restarts', 'Faster than network API calls', 'Stores personalized user choices'],
+          },
+          {
+            heading: 'Common Examples',
+            list: ['Dark / Light mode preference', 'Recently viewed items', 'Saved filters', 'Favorites / watchlist', 'Onboarding flag ("first-time user?")'],
+          },
+        ],
+        highlights: ['Key Idea: Good local storage = better UX + higher app reliability.'],
+      },
+      {
+        heading: 'Types of Local Storage in Flutter',
+        table: {
+          headers: ['Storage Type', 'Best Use Case', 'Example'],
+          rows: [
+            ['SharedPreferences', 'Simple key–value data', 'Settings, flags, theme mode'],
+            ['JSON File (dart:io)', 'Simple structured lists or documents', 'Notes, history, cached data'],
+            ['SQLite (sqflite)', 'Structured, relational, complex data', 'Todo app, inventory, bookmarks'],
+          ],
+        },
+      },
+      {
+        heading: 'What is SharedPreferences?',
+        list: [
+          'Lightweight and easy to use',
+          'Stores simple key–value pairs',
+          'Persistent across app restarts',
+          'Supports both synchronous and asynchronous operations',
+          'Not suitable for complex objects or large data',
+        ],
+        subSections: [
+          {
+            heading: 'Common Use Cases',
+            list: ['Dark/Light theme preference', '"Onboarding completed" flag', 'User login state', 'Default filter or sort mode'],
+          },
+        ],
+      },
+      {
+        heading: 'SharedPreferences Workflow',
+        list: [
+          '1. Load SharedPreferences instance',
+          '2. Read stored values',
+          '3. Update values when user interacts',
+          '4. Save the new key–value pairs',
+          '5. Refresh UI to reflect changes',
+        ],
+        code: `final prefs = await SharedPreferences.getInstance();\n\n// Read\nfinal isDark = prefs.getBool('dark_mode') ?? false;\n\n// Write\nawait prefs.setBool('dark_mode', true);\n\n// Delete\nawait prefs.remove('dark_mode');`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'SharedPreferences Support Across Environments',
+        table: {
+          headers: ['Environment', 'SharedPreferences Support', 'Notes'],
+          rows: [
+            ['Flutter App (Android/iOS)', 'Yes', 'Saves to device persistent storage'],
+            ['Flutter Web', 'Yes (via localStorage)', 'Automatically maps to browser localStorage'],
+            ['DartPad (Flutter mode)', 'No', 'Must use FakePrefs mock class'],
+            ['DartPad (Dart mode)', 'No', 'No plugins supported'],
+          ],
+        },
+        highlights: ['DartPad Version: Use a FakePrefs mock class (in-memory only). Data will reset on reload.'],
+      },
+      {
+        heading: 'Why Use Local Files? (File Storage Basics)',
+        content: 'Use files when:',
+        list: [
+          'Data is bigger than key-value storage',
+          'Data has structure but doesn\'t require SQL',
+          'You want simple offline documents',
+          'You want to export/import JSON',
+          'You want to cache API responses locally',
+        ],
+        subSections: [
+          {
+            heading: 'Key Packages',
+            list: ['path_provider → Find app directories', 'dart:io → Read/write files', 'json.encode / json.decode'],
+          },
+        ],
+        code: `import 'dart:io';\nimport 'dart:convert';\nimport 'package:path_provider/path_provider.dart';\n\nFuture<File> _getFile() async {\n  final dir = await getApplicationDocumentsDirectory();\n  return File('\${dir.path}/notes.json');\n}\n\nFuture<void> saveNotes(List notes) async {\n  final file = await _getFile();\n  await file.writeAsString(json.encode(notes));\n}\n\nFuture<List> loadNotes() async {\n  try {\n    final file = await _getFile();\n    final content = await file.readAsString();\n    return json.decode(content);\n  } catch (_) {\n    return [];\n  }\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Why SQLite?',
+        content: 'Use SQLite when your app needs:',
+        list: [
+          'Structured data (rows and columns)',
+          'Fast read/write operations',
+          'Sorting & filtering (ORDER BY, WHERE)',
+          'Data relationships',
+          'Long-term reliable storage',
+          'Strong offline capability',
+        ],
+        subSections: [
+          {
+            heading: 'Real Use Cases',
+            list: ['Todo / Notes app', 'Offline shopping cart', 'Local user profile', 'Bookmarks / favorites'],
+          },
+        ],
+      },
+      {
+        heading: 'SQFlite vs SQLite',
+        list: [
+          'SQLite = The actual lightweight relational database engine',
+          'SQFlite = Flutter plugin (wrapper) built on top of SQLite',
+        ],
+        highlights: [
+          'SQFlite is the bridge between Dart and native SQLite.',
+          'SQFlite does NOT work on Flutter Web.',
+        ],
+      },
+      {
+        heading: 'SQFlite Basics — CRUD + Setup',
+        content: 'Key operations:',
+        list: [
+          'openDatabase() – Open or create database',
+          'onCreate – Create tables (CREATE TABLE)',
+          'insert() – Add a row',
+          'query() – Read rows',
+          'update() – Modify rows',
+          'delete() – Remove rows',
+        ],
+        code: `final db = await openDatabase(\n  'todo.db',\n  version: 1,\n  onCreate: (db, version) async {\n    await db.execute(\n      'CREATE TABLE todos (id INTEGER PRIMARY KEY, title TEXT, done INTEGER)',\n    );\n  },\n);\n\n// Insert\nawait db.insert('todos', {'title': 'Buy milk', 'done': 0});\n\n// Query\nfinal todos = await db.query('todos', orderBy: 'id DESC');\n\n// Update\nawait db.update('todos', {'done': 1}, where: 'id = ?', whereArgs: [1]);\n\n// Delete\nawait db.delete('todos', where: 'id = ?', whereArgs: [1]);`,
+        codeLanguage: 'dart',
+        highlights: ['Best Practice: Open the database only once and reuse it (use a singleton or service class).'],
+      },
+      {
+        heading: 'SQL SELECT Recap (for SQFlite)',
+        code: `SELECT columns FROM table\nWHERE condition\nORDER BY column\nLIMIT number;`,
+        codeLanguage: 'sql',
+      },
+      {
+        heading: 'Offline-First Concept',
+        content: 'Offline-First means the app still works properly when there is no internet.',
+        list: [
+          'Load data from local storage first',
+          'Sync with server when online',
+          'Provide smooth experience even without network',
+        ],
+        highlights: ['Strategy: Store offline → Use offline → Sync when online → Resolve conflicts'],
+      },
+      {
+        heading: 'When to Use Which Storage?',
+        table: {
+          headers: ['Use Case', 'Recommended Storage'],
+          rows: [
+            ['Theme, flags, small settings', 'SharedPreferences'],
+            ['Simple notes, lists, cache', 'Local JSON File'],
+            ['Large structured data, relations', 'SQLite (SQFlite)'],
+            ['Offline-first + sync with server', 'SQLite + Backend'],
+          ],
+        },
+      },
+      {
+        heading: 'Lab 9: Offline-First Mini App',
+        content: 'Build an Offline-First Multi-Storage App that combines all three storage methods.',
+        subSections: [
+          {
+            heading: 'Features',
+            list: [
+              'SharedPreferences — theme settings (dark/light)',
+              'Local JSON file — notes (read/write)',
+              'SQLite — tasks/todos (full CRUD)',
+            ],
+          },
+          {
+            heading: 'You will practice',
+            list: [
+              'Saving and loading theme preference',
+              'Reading/writing JSON notes',
+              'Performing full CRUD with SQLite',
+              'Refreshing UI after local storage changes',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned the three main local storage methods in Flutter:',
+        list: [
+          'SharedPreferences: Best for simple key-value data (theme, flags)',
+          'JSON Files: Good for document-style data (notes, cache)',
+          'SQLite (SQFlite): Ideal for structured, relational, and complex data',
+        ],
+        highlights: ['You also understood the Offline-First concept and how to combine multiple storage methods in a real mini-app.'],
+      },
+    ],
+  },
+  {
+    id: 10,
+    title: 'Authentication, Session Management & Notifications',
+    icon: '🔐',
+    desc: 'Đăng nhập, quản lý phiên và push notification.',
+    contents: [
+      'Backend authentication & Token-based login (JWT)',
+      'Sessions & secure token storage',
+      'Login + Signup flow',
+      'Auto-login & logout',
+      'Protected routes',
+      'Introduction to Firebase Auth',
+      'Local Notifications after authentication',
+    ],
+    sections: [
+      {
+        heading: 'What is Authentication?',
+        content: 'Authentication = verifying who the user is.',
+        subSections: [
+          { heading: 'Used to', list: ['Protect user accounts', 'Allow personalized features', 'Control access to private data'] },
+          { heading: 'Authentication vs Authorization', list: ['Authentication → Who are you?', 'Authorization → What are you allowed to do?'] },
+        ],
+        highlights: ['Real-world examples: Shopee, GrabFood, Tiki — order history, payment info, and profile all require login.'],
+      },
+      {
+        heading: 'Authentication Flow (High-Level)',
+        list: [
+          '1. User enters credentials (email/password)',
+          '2. App sends API request to backend',
+          '3. Backend verifies credentials',
+          '4. Backend returns a token (usually JWT)',
+          '5. App stores the token locally',
+          '6. App attaches the token to every subsequent API request',
+          '7. Session is maintained until logout or token expires',
+        ],
+      },
+      {
+        heading: 'Token-Based Authentication',
+        content: 'A token is a short-lived digital credential generated by the server to prove a user\'s identity.',
+        subSections: [
+          {
+            heading: 'Benefits',
+            list: ['Stateless', 'Secure', 'Works across mobile and web', 'Fast'],
+          },
+          {
+            heading: 'Types of Tokens',
+            list: ['Access Token (short-lived)', 'Refresh Token (longer-lived, used to get new access token)'],
+          },
+        ],
+        highlights: [
+          'Token ≠ Password. The app does not need to understand the token — it only needs to store it and send it in the Authorization header.',
+          'Token Flow: Login → Server verifies → Returns Access Token + Refresh Token → App stores tokens → Sends Access Token in every request → When expired → Use Refresh Token to get new one.',
+        ],
+      },
+      {
+        heading: 'JWT (JSON Web Token) Explained',
+        content: 'A JWT consists of three parts:',
+        list: [
+          'Header: Algorithm and token type',
+          'Payload: User data (user ID, email, role, expiry time…)',
+          'Signature: Used to verify the token',
+        ],
+        subSections: [
+          {
+            heading: 'Properties',
+            list: ['Base64 encoded', 'Signed (not encrypted)', 'Contains expiry time (exp)'],
+          },
+        ],
+        highlights: ['JWTs must NOT store passwords — only identity claims.'],
+      },
+      {
+        heading: 'Login Screen UI Structure',
+        list: [
+          'Email TextFormField',
+          'Password TextFormField',
+          'Login Button',
+          '"Forgot Password?" link',
+          'Link to Signup screen',
+        ],
+        subSections: [
+          {
+            heading: 'Good Practices',
+            list: ['Inline field validation', 'Disable button while loading', 'Show/hide password toggle'],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 10.1 — Backend Login Flow',
+        content: 'Build a login screen with email and password, validate inputs, simulate backend authentication, receive and store a mock token, then navigate to a protected screen.',
+        subSections: [
+          {
+            heading: 'Steps',
+            list: ['1. Build UI', '2. Simulate backend request', '3. Handle mock response', '4. Navigate to protected screen'],
+          },
+          {
+            heading: 'Mock Backend (AuthService)',
+            list: ['Adds a 2-second delay to simulate network latency', 'Checks demo credentials', 'Returns a mock JWT token when valid'],
+          },
+        ],
+        code: `Future<String?> login(String email, String password) async {\n  await Future.delayed(const Duration(seconds: 2));\n  if (email == 'demo@test.com' && password == 'password123') {\n    return 'mock.jwt.token';\n  }\n  return null; // Invalid credentials\n}`,
+        codeLanguage: 'dart',
+        highlights: [
+          'If valid → Save token and navigate to Home.',
+          'If invalid → Show error Snackbar.',
+        ],
+      },
+      {
+        heading: 'Mock API vs Real API',
+        table: {
+          headers: ['Feature', 'Mock API', 'Real API'],
+          rows: [
+            ['Internet required', 'No', 'Yes'],
+            ['Error-free', 'Always', 'May fail'],
+            ['Works on all devices', 'Yes', 'Not always'],
+            ['Predictability', 'High', 'Medium'],
+            ['Good for teaching', 'Yes', 'Yes'],
+            ['Good for real projects', 'No', 'Yes'],
+          ],
+        },
+        highlights: ['Always start with the Mock version so every student can see successful login. Introduce the Real API version later.'],
+      },
+      {
+        heading: 'Signup Flow Overview',
+        content: 'Extend the login flow by adding a Signup screen.',
+        list: [
+          'User taps "Create account" on Login screen',
+          'Navigate to SignupScreen',
+          'User fills: name, email, password, confirm password',
+          'Form validates input',
+          'App calls AuthService.signup()',
+          'On success → Show success message and return to Login',
+          'On failure → Show appropriate error',
+        ],
+        subSections: [
+          {
+            heading: 'Password Validation Rules',
+            list: [
+              'Minimum 6–8 characters',
+              'At least 1 uppercase letter',
+              'At least 1 number',
+              'No leading/trailing whitespace',
+              'Password and Confirm Password must match',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Understanding User Session',
+        content: 'A session represents the authenticated state of a user. It typically includes: Access token, User profile, Token expiry timestamp.',
+        subSections: [
+          {
+            heading: 'How a session starts',
+            list: ['User logs in', 'App receives and stores token'],
+          },
+          {
+            heading: 'How a session ends',
+            list: ['User logs out', 'Token expires', 'Server forces logout (401 Unauthorized)'],
+          },
+        ],
+      },
+      {
+        heading: 'Persisting Session with SharedPreferences',
+        content: 'Why store the token locally?',
+        list: [
+          'Keep user logged in after app restart',
+          'Enable auto-login',
+          'Faster app startup',
+        ],
+        highlights: [
+          'If token exists → User is authenticated.',
+          'If missing or expired → Show Login screen.',
+        ],
+      },
+      {
+        heading: 'Auto Login Flow',
+        content: 'Splash → Login/Home flow:',
+        list: [
+          '1. Start SplashScreen',
+          '2. Check token from SharedPreferences',
+          '3. If token exists → Go to Home',
+          '4. If no token → Go to Login',
+        ],
+        code: `Future<void> checkSession() async {\n  final prefs = await SharedPreferences.getInstance();\n  final token = prefs.getString('auth_token');\n  if (token != null) {\n    Navigator.pushReplacementNamed(context, '/home');\n  } else {\n    Navigator.pushReplacementNamed(context, '/login');\n  }\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'What is Firebase Authentication?',
+        content: 'Firebase Authentication is a cloud-based identity platform that provides secure and scalable login.',
+        list: [
+          'Google, Apple, Facebook, Email/Password sign-in',
+          'Automatic session persistence',
+          'Built-in token refresh',
+        ],
+        highlights: [
+          'Easier than building your own backend.',
+          'Industry standard for mobile apps.',
+        ],
+      },
+      {
+        heading: 'Google Sign-In Authentication Flow',
+        list: [
+          '1. User taps "Sign in with Google"',
+          '2. Google account chooser appears',
+          '3. Google issues OAuth tokens',
+          '4. Convert to Firebase credential',
+          '5. Firebase signs in the user',
+          '6. App receives FirebaseUser object',
+          '7. Navigate to Home',
+        ],
+        subSections: [
+          {
+            heading: 'Required Configurations',
+            list: [
+              'Create Firebase Project',
+              'Add Android app with correct package name',
+              'Add SHA-1 and SHA-256 fingerprints',
+              'Download google-services.json',
+              'Add dependencies: firebase_core, firebase_auth, google_sign_in',
+              'Enable Google Sign-In in Firebase Console',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Common Errors & Fixes (Google Sign-In)',
+        table: {
+          headers: ['Error', 'Cause', 'Fix'],
+          rows: [
+            ['Google Sign-In screen not appear', 'Missing SHA-1', 'Add SHA-1 and rebuild'],
+            ['DEVELOPER_ERROR', 'Wrong package name', 'Match package name in Firebase'],
+            ['Firebase initialization error', 'Missing google-services.json', 'Place file in android/app/'],
+            ['App crashes at launch', 'Missing Gradle plugin', 'Add google-services plugin'],
+          ],
+        },
+      },
+      {
+        heading: 'Local vs Push Notifications',
+        content: 'A notification is a system-level message displayed outside the app UI.',
+        table: {
+          headers: ['Type', 'Triggered by', 'Internet Required', 'Backend Needed'],
+          rows: [
+            ['Local Notification', 'The app itself', 'No', 'No'],
+            ['Push Notification', 'Server', 'Yes', 'Yes'],
+          ],
+        },
+        highlights: ['Focus in this module: Local Notifications.'],
+      },
+      {
+        heading: 'Demo 10.5: Local Notification Flow',
+        content: 'Integrate local notifications and trigger a notification after successful login.',
+        list: [
+          'Integrate flutter_local_notifications package',
+          'Trigger a notification after successful login',
+          'Keep notification logic separate from authentication logic',
+        ],
+        highlights: [
+          'Example notification: "Login successful. Welcome back!"',
+          'Also used for: Account activity alerts, Password reset confirmation.',
+        ],
+      },
+      {
+        heading: 'Best Practices & Patterns',
+        subSections: [
+          {
+            heading: 'Security',
+            list: [
+              'Hash & salt passwords (server-side)',
+              'Never store raw passwords',
+              'Always use HTTPS',
+              'Store tokens securely (not in SharedPreferences for production)',
+            ],
+          },
+          {
+            heading: 'User Experience',
+            list: ['Clear and friendly error messages', 'Show loading indicators during network calls', 'Support auto-login'],
+          },
+          {
+            heading: 'Architecture',
+            list: [
+              'Use AuthService as a singleton',
+              'Standard flow: Splash → Login → Home',
+              'Use pushReplacementNamed() to prevent going back to Login',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned:',
+        list: [
+          'Core concepts of authentication, authorization, sessions, and JWT tokens',
+          'How to design and validate login/signup forms',
+          'Token-based authentication with mock and real APIs',
+          'Session persistence and auto-login using SharedPreferences',
+          'Firebase Authentication and Google Sign-In',
+          'Local notifications to enhance user experience after authentication',
+        ],
+      },
+    ],
+  },
+  {
+    id: 11,
+    title: 'Testing & Debugging in Flutter',
+    icon: '🧪',
+    desc: 'Unit test, widget test, debug và tối ưu lỗi.',
+    contents: [
+      'Why Testing & Debugging Matter',
+      'Types of Tests (Unit, Widget, Integration)',
+      'The Flutter Testing Pyramid',
+      'Testing Workflow',
+      'Demo 11.1 – Unit Test: Task Model',
+      'Demo 11.2 – Widget Test: Add Task Updates UI',
+      'Demo 11.3 – Navigation Test',
+      'Demo 11.4 – Integration Test: Full CRUD Flow',
+      'Best Practices & Summary',
+    ],
+    sections: [
+      {
+        heading: 'Why Testing & Debugging Matter',
+        content: 'Users expect smooth 60–120 FPS experiences. Poor code quality leads to real problems:',
+        list: [
+          'Poor rebuild patterns increase CPU load',
+          'Large assets slow startup times',
+          'Inefficient list rendering affects scrolling',
+          'App size impacts downloads and Play Store acceptance',
+        ],
+        highlights: [
+          'UI Overflow Error — occurs when a widget exceeds its layout constraints. These issues do not crash the app, so tests and DevTools are needed to detect them.',
+        ],
+      },
+      {
+        heading: 'Types of Tests in Flutter',
+        table: {
+          headers: ['Test Type', 'Purpose', 'Scope'],
+          rows: [
+            ['Unit Tests', 'Validate pure logic without UI', 'Small, fast'],
+            ['Widget Tests', 'Validate UI rendering and user interactions', 'Medium'],
+            ['Integration Tests', 'Validate full user flows from start to finish', 'Large, slower'],
+          ],
+        },
+      },
+      {
+        heading: 'The Flutter Testing Pyramid',
+        list: [
+          'Unit Tests → Many (fast, stable, cheap). Catch logic bugs early.',
+          'Widget Tests → Moderate. Validate UI behavior.',
+          'Integration Tests → Few. Use only for critical user flows.',
+        ],
+        highlights: ['Most UI issues start from logic → unit tests catch problems early. Layout & interaction problems → widget tests. Multi-screen bugs → integration tests.'],
+      },
+      {
+        heading: 'Flutter Testing Workflow',
+        list: [
+          '1. Define the expected behavior',
+          '2. Prepare the test environment',
+          '3. Execute logic or render the widget',
+          '4. Simulate user interactions',
+          '5. Use expect() to verify the results',
+        ],
+      },
+      {
+        heading: 'How Tests Map to Real Flutter Problems',
+        table: {
+          headers: ['Flutter Issue', 'Recommended Test', 'Why'],
+          rows: [
+            ['Logic failure', 'Unit Test', 'Fast + stable'],
+            ['UI not updating', 'Widget Test', 'Validates rebuild'],
+            ['Wrong navigation', 'Navigation Test', 'Checks route + data'],
+            ['Entire feature broken', 'Integration Test', 'Simulates real use'],
+          ],
+        },
+      },
+      {
+        heading: 'Introducing the Taskly Demo App',
+        content: 'We use Taskly, a simple Todo App, to demonstrate each test type.',
+        subSections: [
+          {
+            heading: 'Features',
+            list: ['Task List screen', 'Task Detail screen', 'Add, delete, toggle tasks', 'Edit and save tasks'],
+          },
+          {
+            heading: 'App Structure',
+            list: [
+              'TasklyApp — application entry point',
+              'Provider (TaskProvider) — manages app-wide state',
+              'TaskRepository — handles CRUD logic for tasks',
+              'TaskListScreen — primary UI used in testing',
+            ],
+          },
+        ],
+        highlights: ['State flow: UI → Provider → Repository. This structure supports unit, widget, navigation, and integration testing.'],
+      },
+      {
+        heading: 'Demo 11.1 – Unit Test: Task Model',
+        content: 'File: test/unit/demo_11_1_task_model_test.dart',
+        subSections: [
+          {
+            heading: 'What we test',
+            list: ['Toggle completion', 'Update model state', 'Ensure logic stays predictable'],
+          },
+          {
+            heading: 'Expected Output',
+            list: ['Initial: completed = false', 'After toggle(): completed = true'],
+          },
+        ],
+        code: `test('toggle task completion', () {\n  final task = Task(id: '1', title: 'Buy milk', completed: false);\n  final toggled = task.toggle();\n  expect(toggled.completed, true);\n});`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Demo 11.2 – Widget Test: Add Task Updates UI',
+        content: 'File: test/widget/demo_11_2_task_list_add_test.dart',
+        subSections: [
+          {
+            heading: 'What we test',
+            list: ['Enter text', 'Tap "Add"', 'List updates with the newly added task'],
+          },
+          {
+            heading: 'Expected Output',
+            list: ['Before: "No tasks yet. Add one!"', 'After: "Buy milk"'],
+          },
+          {
+            heading: 'What this proves',
+            list: ['UI rebuilds correctly', 'Provider state updates', 'ListView reacts to new data'],
+          },
+        ],
+        code: `testWidgets('add task updates list', (tester) async {\n  await tester.pumpWidget(TasklyApp());\n  await tester.enterText(find.byType(TextField), 'Buy milk');\n  await tester.tap(find.text('Add'));\n  await tester.pump();\n  expect(find.text('Buy milk'), findsOneWidget);\n});`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Demo 11.3 – Navigation Test: List → Detail',
+        subSections: [
+          {
+            heading: 'What we test',
+            list: [
+              'Click on an item in the list',
+              'Navigate to the detail screen',
+              'Data is passed correctly to the detail screen',
+            ],
+          },
+          {
+            heading: 'Expected Output',
+            list: ['New screen shows "Task Details"', 'Detail form is loaded with task data'],
+          },
+        ],
+        highlights: ['Navigation errors are common. This test ensures routes and widget tree behave correctly.'],
+        code: `testWidgets('tap task navigates to detail', (tester) async {\n  await tester.pumpWidget(TasklyApp());\n  await tester.tap(find.text('Buy milk'));\n  await tester.pumpAndSettle();\n  expect(find.text('Task Details'), findsOneWidget);\n});`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Demo 11.4 – Integration Test: Full CRUD Flow',
+        subSections: [
+          {
+            heading: 'What we test',
+            list: [
+              'Add a task',
+              'Open detail screen',
+              'Edit title',
+              'Save changes',
+              'Confirm the updated title appears in the list',
+            ],
+          },
+          {
+            heading: 'Expected Output',
+            list: ['Old title disappears', 'New title is displayed'],
+          },
+        ],
+        highlights: [
+          'Integration tests validate the entire user journey.',
+          'Ensure all layers (UI → Provider → Repository) interact correctly.',
+        ],
+      },
+      {
+        heading: 'Best Practices',
+        list: [
+          'Keep tests small and focused',
+          'Use keys for widget tests',
+          'Mock repositories when possible',
+          'Avoid testing Flutter framework functionality',
+          'Don\'t overuse integration tests (they are slow and expensive)',
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned how to:',
+        list: [
+          'Identify common UI and state-related issues in Flutter apps',
+          'Apply the Flutter testing pyramid (Unit → Widget → Integration)',
+          'Write unit tests to verify logic and model behavior',
+          'Write widget tests to validate UI rendering and interactions',
+          'Write integration tests to confirm full user flows',
+          'Use DevTools to diagnose layout, rebuild, and navigation issues',
+        ],
+      },
+    ],
+  },
+  {
+    id: 12,
+    title: 'Performance Optimization & App Deployment',
+    icon: '🏆',
+    desc: 'Tối ưu hiệu năng và deploy app lên store.',
+    contents: [
+      'Why Performance Matters (FPS, render pipeline)',
+      'Common performance bottlenecks',
+      'Flutter DevTools overview',
+      'Optimization techniques (const, widget extraction, Selector, Keys)',
+      'Image optimization',
+      'App size analysis',
+      'Building Release APK / AppBundle',
+      'Deployment checklist',
+    ],
+    sections: [
+      {
+        heading: 'Why Performance Matters in Flutter',
+        content: 'Performance directly affects frame rendering, user experience, device constraints, and real-world publishing.',
+        table: {
+          headers: ['Target', 'Frame Budget'],
+          rows: [
+            ['60 FPS (standard)', '16.6 ms per frame'],
+            ['120 FPS (new devices)', '8 ms per frame'],
+          ],
+        },
+        highlights: [
+          'FPS (Frames Per Second) = number of frames drawn per second. Higher FPS = smoother experience.',
+          'Flutter must complete each frame (build → layout → paint) within the allowed time. If any step exceeds the limit, frames are dropped.',
+          'Stutters, jank, and slow scrolling make the app feel cheap. Poorly optimized lists are the biggest cause of lag in student apps.',
+        ],
+      },
+      {
+        heading: 'How Flutter Builds the UI (Render Pipeline)',
+        list: [
+          'Widgets — immutable blueprints',
+          'Elements — manage lifecycle and state',
+          'RenderObjects — perform layout, painting, and compositing',
+        ],
+        highlights: ['Performance Principle: Avoid unnecessary work in build(), and reduce rebuilds as much as possible.'],
+      },
+      {
+        heading: 'What Causes Performance Problems?',
+        subSections: [
+          {
+            heading: 'Common Issues',
+            list: [
+              'Too many widget rebuilds',
+              'Heavy logic running inside build()',
+              'Loading large images at full resolution',
+              'Overly deep widget trees',
+              'Incorrect use of setState() or Provider listeners',
+              'Inefficient list rendering (ListView with many items)',
+              'Expensive synchronous operations on the UI thread',
+              'Overuse of GlobalKey',
+            ],
+          },
+          {
+            heading: 'Typical problems in student apps',
+            list: [
+              'Entire screen rebuilds when only one item changes',
+              'Constant rebuild of large widget trees',
+              'Loading full-resolution images from the network',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Flutter DevTools Overview',
+        table: {
+          headers: ['Tool', 'Purpose'],
+          rows: [
+            ['Performance', 'FPS timeline, frame rendering cost'],
+            ['CPU Profiler', 'Identify execution hotspots'],
+            ['Memory', 'Detect leaks and allocations'],
+            ['Widget Inspector', 'Identify rebuild sources'],
+            ['Repaint Rainbow', 'Highlight repaint boundaries'],
+            ['Rebuild Tracker', 'Count widget rebuilds'],
+          ],
+        },
+        highlights: [
+          'Always run in Profile Mode for accurate measurements.',
+          'Never measure performance in Debug mode — it adds significant overhead.',
+        ],
+      },
+      {
+        heading: 'Optimization Technique 1: Use const Effectively',
+        content: 'const reduces rebuilds, saves memory, and helps Flutter\'s diffing algorithm.',
+        code: `// Bad — rebuilds every time\nText("Task Title")\n\n// Good — never rebuilds\nconst Text("Task Title")`,
+        codeLanguage: 'dart',
+        highlights: ['Use const for any widget whose properties never change at runtime.'],
+      },
+      {
+        heading: 'Optimization Technique 2: Extract Widgets',
+        content: 'Large widgets that rebuild unnecessarily cause lag. Extract reusable parts into separate widget classes.',
+        list: [
+          'Only the extracted widget rebuilds when its data changes',
+          'Parent widget remains stable',
+          'Cleaner and more maintainable code',
+        ],
+        highlights: ['Example: Extract TaskTile as a separate widget instead of building ListTile inline.'],
+      },
+      {
+        heading: 'Optimization Technique 3: Avoid Heavy Work in build()',
+        content: 'Never do this inside build():',
+        list: ['Sorting lists', 'Parsing JSON', 'Complex calculations', 'Database reads', 'API calls'],
+        code: `// Anti-pattern — Wrong!\nWidget build(BuildContext context) {\n  final sorted = tasks..sort(); // Runs on every rebuild!\n}\n\n// Correct — perform heavy work once\nvoid initState() {\n  super.initState();\n  _sortedTasks = List.from(tasks)..sort();\n}`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Optimization Technique 4: Using Keys Properly',
+        content: 'Keys help Flutter identify widgets across rebuilds.',
+        subSections: [
+          {
+            heading: 'When to use keys',
+            list: ['Preserving state across rebuilds', 'Animations', 'Reordering lists', 'Improving diffing performance'],
+          },
+          {
+            heading: 'Warnings',
+            list: [
+              'Avoid GlobalKey unless absolutely necessary — it is powerful but expensive',
+              'UniqueKey() forces rebuilds every time — avoid in lists',
+            ],
+          },
+        ],
+        highlights: ['Good practice: Use ValueKey(task.id) for list items.'],
+      },
+      {
+        heading: 'Demo 12.1 – Optimize List & UI Rebuilds',
+        content: 'Problem: Entire TaskListScreen rebuilds whenever tasks change because context.watch<TaskProvider>() is at the top level.',
+        subSections: [
+          {
+            heading: 'Solution',
+            list: [
+              'Extract TaskTile as a separate widget',
+              'Use Selector to rebuild only the list',
+              'Make static UI independent of task list',
+              'Add const where possible',
+            ],
+          },
+          {
+            heading: 'Performance Result',
+            list: [
+              'Before: Entire screen rebuilds on every change',
+              'After: Only the affected TaskTile rebuilds → smoother scrolling and better architecture',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 12.2 – Image Optimization',
+        content: 'Large/uncompressed images hurt performance. Apply these techniques:',
+        list: [
+          '1. Resize images before use (width, height parameters)',
+          '2. Pre-cache frequently used images (precacheImage)',
+          '3. Use FadeInImage for remote images (shows placeholder while loading)',
+          '4. Avoid decoding images inside build()',
+        ],
+        code: `// Pre-cache\nawait precacheImage(NetworkImage(url), context);\n\n// FadeInImage with placeholder\nFadeInImage.assetNetwork(\n  placeholder: 'assets/placeholder.png',\n  image: imageUrl,\n  width: 100,\n  height: 100,\n  fit: BoxFit.cover,\n)`,
+        codeLanguage: 'dart',
+      },
+      {
+        heading: 'Demo 12.3 – App Size Analysis',
+        content: 'Generate a size analysis report to identify unnecessary dependencies or large assets.',
+        code: `# Analyze APK size\nflutter build apk --analyze-size\n\n# Output includes HTML treemap and JSON report`,
+        codeLanguage: 'bash',
+        subSections: [
+          {
+            heading: 'Common Tips to Reduce Size',
+            list: [
+              'Remove unused assets',
+              'Compress large images',
+              'Delete unused dependencies',
+              'Enable icon tree-shaking',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Demo 12.4: Building & Deploying the Release App',
+        subSections: [
+          {
+            heading: 'Build Modes',
+            list: [
+              'Debug — development, slow, with debugging overhead',
+              'Profile — near-release performance, no debugging overhead',
+              'Release — fully optimized, for distribution',
+            ],
+          },
+        ],
+        code: `# Run in Profile Mode (near-release performance)\nflutter run --profile\n\n# Build Release APK\nflutter build apk --release\n# Output: build/app/outputs/flutter-apk/app-release.apk\n\n# Build AppBundle (for Google Play)\nflutter build appbundle --release`,
+        codeLanguage: 'bash',
+        highlights: [
+          'Update versionCode and versionName in build.gradle before release.',
+          'AppBundle is preferred for Google Play — it enables smaller downloads via Dynamic Delivery.',
+        ],
+      },
+      {
+        heading: 'Deployment Checklist',
+        list: [
+          'Remove debug statements',
+          'Check app icons and splash screen',
+          'Clean unused assets',
+          'Update versionCode',
+          'Test in Profile mode',
+          'Test release APK on physical device',
+          'Review size report (--analyze-size)',
+          'Scan for crashes',
+        ],
+      },
+      {
+        heading: 'Best Practices Summary',
+        subSections: [
+          {
+            heading: 'Rendering',
+            list: ['Use const wherever possible', 'Extract widgets', 'Avoid heavy work in build()'],
+          },
+          {
+            heading: 'State & Rebuilds',
+            list: ['Use Selector for fine-grained updates', 'Keep state close to where it is used'],
+          },
+          {
+            heading: 'Lists',
+            list: ['Always use ListView.builder', 'Extract list items', 'Use stable keys (ValueKey)'],
+          },
+          {
+            heading: 'Images',
+            list: ['Resize and compress', 'Pre-cache', 'Avoid decoding in build()'],
+          },
+          {
+            heading: 'App Size',
+            list: ['Remove unused assets and dependencies', 'Enable icon tree-shaking'],
+          },
+          {
+            heading: 'DevTools & Deployment',
+            list: ['Always test in Profile mode', 'Fix jank and rebuild hotspots before release'],
+          },
+        ],
+      },
+      {
+        heading: 'Summary',
+        content: 'In this module, you learned to:',
+        list: [
+          'Understand Flutter\'s rendering pipeline and common performance bottlenecks',
+          'Identify issues such as unnecessary rebuilds, heavy image decoding, and inefficient lists',
+          'Use DevTools for profiling FPS, memory, rebuilds, and CPU usage',
+          'Apply practical optimizations: const, widget extraction, Selector, list tuning',
+          'Analyze and reduce app size',
+          'Build Release APK/AppBundle and prepare the app for deployment',
+        ],
+      },
+    ],
+  },
 ];
