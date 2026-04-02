@@ -5460,8 +5460,6 @@ export const QUIZZES: ModuleQuiz[] = [
       {
         id: 1,
         question: 'What frame rate does Flutter target for smooth UI on standard devices?',
-        id: 1,
-        question: 'What frame rate does Flutter target for smooth UI on standard devices?',
         options: [
           '60 FPS (16.6ms/frame) and 120 FPS on newer devices',
           '30 FPS',
